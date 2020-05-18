@@ -74,4 +74,7 @@ if __name__ == '__main__':
 			print('invocation took %s seconds' % (end - start))
 			logging.info('invocation took %s seconds' % (end - start))
 
+		if len(latencies) > 200:
+			del latencies[:200]
+
 		sckt.send(pa.serialize(latencies).to_buffer().to_pybytes())
