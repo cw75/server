@@ -2,11 +2,35 @@ import time
 import numpy as np
 from PIL import Image
 
-import zmq
+import logging
 
+import zmq
+import sys
 import pyarrow as pa
 
 if __name__ == '__main__':
+	logging.basicConfig(filename='log_client.txt', level=logging.INFO,
+		format='%(asctime)s %(message)s')
+
+	ip = sys.argv[1]
+	logging.info('client ip is %s' % ip)
+
+	f = open("/server-config.txt", "r")
+	lines = f.readlines()
+
+	server_list = []
+	client_list = []
+
+	for i, l in lines.enumerate():
+		if i == 0:
+			server_list = l.strip().split()
+		else:
+			client_list = l.strip().split()
+
+	my_position = client_list.index(ip)
+	server_ip = server_list[my_position]
+	logging.info('corresponding server ip is %s' % server_ip)
+
 	context = zmq.Context()
 
 	bind_socket = context.socket(zmq.REP)
@@ -15,9 +39,10 @@ if __name__ == '__main__':
 
 	connect_socket = context.socket(zmq.REQ)
 	connect_port = "5556"
-	connect_socket.connect("tcp://3.235.92.51:%s" % connect_port)
+	connect_socket.connect("tcp://%s:%s" % (server_ip, connect_port))
 
 	print('listening for trigger')
+	logging.info('listening for trigger')
 
 	while True:
 		num_requests = int(bind_socket.recv_string())
