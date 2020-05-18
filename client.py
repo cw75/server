@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	server_list = []
 	client_list = []
 
-	for i, l in lines.enumerate():
+	for i, l in enumerate(lines):
 		if i == 0:
 			server_list = l.strip().split()
 		else:
