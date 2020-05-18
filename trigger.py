@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
   msg = sys.argv[1]
 
-	context = zmq.Context()
+  context = zmq.Context()
   recv_socket = context.socket(zmq.PULL)
   recv_socket.bind('tcp://*:3000')
 
@@ -62,4 +62,4 @@ if __name__ == '__main__':
     total += latencies
     end_recv += 1
 
-	print_latency_stats(total, 'cascade')
+  print_latency_stats(total, 'cascade')
