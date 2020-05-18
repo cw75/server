@@ -4,6 +4,8 @@ import time
 import numpy as np
 from PIL import Image
 
+import logging
+
 import zmq
 
 import pyarrow as pa
@@ -23,10 +25,8 @@ def invoke(endpoint, payload):
 
 
 if __name__ == '__main__':
-	#fname = 'cat.jpg'
-	#img = np.array(Image.open(fname).convert('RGB').resize((224, 224)))
-	#payload = pa.serialize(['t', img]).to_buffer().to_pybytes()
-	#start = time.time()
+	logging.basicConfig(filename='log_server.txt', level=logging.INFO,
+		format='%(asctime)s %(message)s')
 
 	context = zmq.Context()
 	socket = context.socket(zmq.REP)
@@ -34,6 +34,7 @@ if __name__ == '__main__':
 	socket.bind("tcp://*:%s" % port)
 
 	print('listening for request')
+	logging.info('listening for request')
 
 	while True:
 		payload = socket.recv()
