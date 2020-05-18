@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
 	context = zmq.Context()
 
-	bind_socket = context.socket(zmq.REP)
+	bind_socket = context.socket(zmq.PULL)
 	bind_port = "5555"
 	bind_socket.bind("tcp://*:%s" % bind_port)
 
@@ -45,7 +45,16 @@ if __name__ == '__main__':
 	logging.info('listening for trigger')
 
 	while True:
-		num_requests = int(bind_socket.recv_string())
+		params = bind_socket.recv_string().split(':')
+
+		logging.info('received trigger')
+
+		respond_ip = params[0]
+		num_requests = int(params[1])
+
+		sckt = context.socket(zmq.PUSH)
+		sckt.connect('tcp://' + respond_ip + ':3000')
+
 
 		latencies = []
 
@@ -55,6 +64,7 @@ if __name__ == '__main__':
 
 		for request in range(num_requests):
 			print('request number %d' % request)
+			logging.info('request number %d' % request)
 			start = time.time()
 			connect_socket.send(payload)
 			message = connect_socket.recv()
@@ -62,5 +72,6 @@ if __name__ == '__main__':
 			print(pa.deserialize(message))
 			latencies.append((end - start))
 			print('invocation took %s seconds' % (end - start))
+			logging.info('invocation took %s seconds' % (end - start))
 
-		bind_socket.send(pa.serialize(latencies).to_buffer().to_pybytes())
+		sckt.send(pa.serialize(latencies).to_buffer().to_pybytes())
