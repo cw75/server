@@ -63,7 +63,7 @@ if __name__ == '__main__':
 		payload = pa.serialize(['t', img]).to_buffer().to_pybytes()
 
 		for request in range(num_requests):
-			if request % 100 == 0:
+			if request % 10 == 0:
 				print('request number %d' % request)
 				logging.info('request number %d' % request)
 			start = time.time()
