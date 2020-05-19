@@ -2,6 +2,7 @@ import time
 import numpy as np
 from PIL import Image
 import os
+import random
 
 import logging
 
