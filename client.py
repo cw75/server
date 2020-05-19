@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from PIL import Image
+import os
 
 import logging
 
@@ -41,6 +42,14 @@ if __name__ == '__main__':
 	connect_port = "5556"
 	connect_socket.connect("tcp://%s:%s" % (server_ip, connect_port))
 
+	logging.info('loading images')
+	prefix = 'imagenet'
+	files = os.listdir(prefix)
+	files = [os.path.join(prefix, fname) for fname in files]
+	image_list = []
+	for fname in files:
+		image_list.append(np.array(Image.open(fname).convert('RGB').resize((224, 224))))
+
 	print('listening for trigger')
 	logging.info('listening for trigger')
 
@@ -58,15 +67,13 @@ if __name__ == '__main__':
 
 		latencies = []
 
-		fname = 'cat.jpg'
-		img = np.array(Image.open(fname).convert('RGB').resize((224, 224)))
-		payload = pa.serialize(['t', img]).to_buffer().to_pybytes()
-
 		for request in range(num_requests):
 			if request % 10 == 0:
 				print('request number %d' % request)
 				logging.info('request number %d' % request)
 			start = time.time()
+			img = random.choice(image_list)
+			payload = pa.serialize(['t', img]).to_buffer().to_pybytes()
 			connect_socket.send(payload)
 			message = connect_socket.recv()
 			end = time.time()
