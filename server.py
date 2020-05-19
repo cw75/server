@@ -42,7 +42,7 @@ if __name__ == '__main__':
 		#print('Transform Stage')
 		#logging.info('Transform Stage')
 		#transformed_img = pa.deserialize(invoke('cascade-transform', payload))
-		transformed_img = pa.deserialize(invoke('cascade-transform-gpu', payload))
+		transformed_img = pa.deserialize(invoke('cascade-transform', payload))
 		#print('Resnet Stage')
 		#logging.info('Resnet Stage')
 		payload = pa.serialize(['r', transformed_img]).to_buffer().to_pybytes()
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 		payload = pa.serialize(['c', res_index, res_prob, ic_index, ic_prob]).to_buffer().to_pybytes()
 		#result = pa.deserialize(invoke('cascade', payload))
 		#socket.send(invoke('cascade-cascade', payload))
-		socket.send(invoke('cascade-cascade-gpu', payload))
+		socket.send(invoke('cascade-cascade', payload))
 		#print(result)
 
 	#end = time.time()
