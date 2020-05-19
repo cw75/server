@@ -63,16 +63,17 @@ if __name__ == '__main__':
 		payload = pa.serialize(['t', img]).to_buffer().to_pybytes()
 
 		for request in range(num_requests):
-			print('request number %d' % request)
-			logging.info('request number %d' % request)
+			if request % 100 == 0:
+				print('request number %d' % request)
+				logging.info('request number %d' % request)
 			start = time.time()
 			connect_socket.send(payload)
 			message = connect_socket.recv()
 			end = time.time()
-			print(pa.deserialize(message))
+			#print(pa.deserialize(message))
 			latencies.append((end - start))
-			print('invocation took %s seconds' % (end - start))
-			logging.info('invocation took %s seconds' % (end - start))
+			#print('invocation took %s seconds' % (end - start))
+			#logging.info('invocation took %s seconds' % (end - start))
 
 		if len(latencies) > 200:
 			del latencies[:200]
