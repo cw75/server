@@ -102,7 +102,7 @@ if __name__ == '__main__':
 			connect_socket.send(payload)
 			message = connect_socket.recv()
 			end = time.time()
-			logging.info('translation is: %s' % pa.deserialize(message))
+			#logging.info('translation is: %s' % pa.deserialize(message))
 			latencies.append((end - start))
 
 		if len(latencies) > 200:
