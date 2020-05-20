@@ -108,4 +108,6 @@ if __name__ == '__main__':
 		if len(latencies) > 200:
 			del latencies[:200]
 
-		sckt.send(pa.serialize(latencies).to_buffer().to_pybytes())
+		throughput = len(latencies) / sum(latencies)
+
+		sckt.send(pa.serialize([latencies, throughput]).to_buffer().to_pybytes())

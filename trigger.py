@@ -55,11 +55,14 @@ if __name__ == '__main__':
     sent_msgs += 1
 
   total = []
+  total_throughput = 0.0
   end_recv = 0
 
   while end_recv < sent_msgs:
-    latencies = pa.deserialize(recv_socket.recv())
+    latencies, throughput = pa.deserialize(recv_socket.recv())
+    total_throughput += throughput
     total += latencies
     end_recv += 1
 
-  print_latency_stats(total, 'cascade')
+  print_latency_stats(total, 'nmt')
+  print('throughput is: %f ops/s' % total_throughput)

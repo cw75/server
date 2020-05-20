@@ -47,8 +47,8 @@ if __name__ == '__main__':
 		#logging.info('Translation Stage')
 		payload = pa.serialize(english_sentence).to_buffer().to_pybytes()
 		if language == 'fr':
-			socket.send(invoke('nmt-f', payload))
+			socket.send(invoke('nmt-f-gpu', payload))
 		elif language == 'de':
-			socket.send(invoke('nmt-g', payload))
+			socket.send(invoke('nmt-g-gpu', payload))
 		else:
 			logging.error('Unexpected Language Type')
