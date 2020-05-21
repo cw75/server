@@ -51,13 +51,13 @@ if __name__ == '__main__':
 	while True:
 		payload = socket.recv()
 
-		logging.info('Yolo Stage')
+		#logging.info('Yolo Stage')
 		result = invoke('video-yolo-gpu', payload)
 
-		logging.info('Transform Stage')
+		#logging.info('Transform Stage')
 		result = invoke('video-transform', result)
 
-		logging.info('Parallel Resnet Stage')
+		#logging.info('Parallel Resnet Stage')
 		results = p.map(invoke_parallel, [('video-resnet-person-gpu', result, 'p'), ('video-resnet-vehicle-gpu', result, 'v')])
 
 		accumulated = []

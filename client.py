@@ -91,7 +91,7 @@ if __name__ == '__main__':
 				payload = pa.serialize(images[6*segment:6*segment+6]).to_buffer().to_pybytes()
 				connect_socket.send(payload)
 				message = connect_socket.recv()
-				logging.info(pa.deserialize(message))
+				#logging.info(pa.deserialize(message))
 				segment += 1
 
 			end = time.time()
