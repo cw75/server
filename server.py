@@ -23,6 +23,16 @@ def invoke(endpoint, payload):
 	    )
 	return response['Body'].read()
 
+def invoke_parallel(inp):
+	endpoint, payload, custom_attributes = inp
+	response = client.invoke_endpoint(
+	    EndpointName=endpoint, 
+	    ContentType=content_type,
+	    CustomAttributes=custom_attributes,
+	    Body=payload
+	    )
+	return response['Body'].read()
+
 
 if __name__ == '__main__':
 	logging.basicConfig(filename='log_server.txt', level=logging.INFO,
@@ -36,30 +46,22 @@ if __name__ == '__main__':
 	print('listening for request')
 	logging.info('listening for request')
 
+	p = Pool(2)
+
 	while True:
 		payload = socket.recv()
 
-		#print('Transform Stage')
-		#logging.info('Transform Stage')
-		#transformed_img = pa.deserialize(invoke('cascade-transform', payload))
-		transformed_img = pa.deserialize(invoke('cascade-transform', payload))
-		#print('Resnet Stage')
-		#logging.info('Resnet Stage')
-		payload = pa.serialize(['r', transformed_img]).to_buffer().to_pybytes()
-		#res_index, res_prob = pa.deserialize(invoke('cascade-resnet', payload))
-		res_index, res_prob = pa.deserialize(invoke('cascade-resnet', payload))
-		#print('Inception Stage')
-		#logging.info('Inception Stage')
-		payload = pa.serialize(['i', transformed_img, res_prob]).to_buffer().to_pybytes()
-		#ic_index, ic_prob = pa.deserialize(invoke('cascade-inception', payload))
-		ic_index, ic_prob = pa.deserialize(invoke('cascade-inception', payload))
-		#print('Cascade Stage')
-		#logging.info('Cascade Stage')
-		payload = pa.serialize(['c', res_index, res_prob, ic_index, ic_prob]).to_buffer().to_pybytes()
-		#result = pa.deserialize(invoke('cascade', payload))
-		#socket.send(invoke('cascade-cascade', payload))
-		socket.send(invoke('cascade-cascade', payload))
-		#print(result)
+		logging.info('Yolo Stage')
+		result = invoke('video-yolo-gpu', payload)
 
-	#end = time.time()
-	#print('invocation took %s seconds' % (end - start))
+		logging.info('Transform Stage')
+		result = invoke('video-transform', result)
+
+		logging.info('Parallel Resnet Stage')
+		results = p.map(invoke_parallel, [('video-resnet-person-gpu', result, 'p'), ('video-resnet-vehicle-gpu', result, 'v')])
+
+		accumulated = []
+		for payload in results:
+			accumulated += pa.deserialize(payload)
+
+		socket.send(pa.serialize(accumulated).to_buffer().to_pybytes())
