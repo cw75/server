@@ -42,7 +42,7 @@ if __name__ == '__main__':
 		payload = pa.serialize(inp).to_buffer().to_pybytes()
 
 		#logging.info('Classification Stage')
-		language = pa.deserialize(invoke('nmt-c', payload))
+		language = pa.deserialize(invoke('nmt-c-2x', payload))
 
 		#logging.info('Translation Stage')
 		payload = pa.serialize(english_sentence).to_buffer().to_pybytes()
