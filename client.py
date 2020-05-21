@@ -74,7 +74,7 @@ if __name__ == '__main__':
 				logging.info('request number %d' % request)
 			start = time.time()
 			img = random.choice(image_list)
-			payload = pa.serialize(['t', img]).to_buffer().to_pybytes()
+			payload = pa.serialize(img).to_buffer().to_pybytes()
 			connect_socket.send(payload)
 			message = connect_socket.recv()
 			end = time.time()

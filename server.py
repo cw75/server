@@ -15,10 +15,11 @@ client = boto3.client('sagemaker-runtime')
 #endpoint_name = 'composition'
 content_type = 'text/plain'
 
-def invoke(endpoint, payload):
+def invoke(endpoint, payload, custom_attributes):
 	response = client.invoke_endpoint(
 	    EndpointName=endpoint, 
 	    ContentType=content_type,
+	    CustomAttributes=custom_attributes,
 	    Body=payload
 	    )
 	return response['Body'].read()
@@ -42,23 +43,23 @@ if __name__ == '__main__':
 		#print('Transform Stage')
 		#logging.info('Transform Stage')
 		#transformed_img = pa.deserialize(invoke('cascade-transform', payload))
-		transformed_img = pa.deserialize(invoke('cascade-transform', payload))
+		serialized_transformed_img = invoke('cascade-transform', payload, 't')
 		#print('Resnet Stage')
 		#logging.info('Resnet Stage')
-		payload = pa.serialize(['r', transformed_img]).to_buffer().to_pybytes()
 		#res_index, res_prob = pa.deserialize(invoke('cascade-resnet', payload))
-		res_index, res_prob = pa.deserialize(invoke('cascade-resnet', payload))
+		res_index, res_prob = pa.deserialize(invoke('cascade-resnet', serialized_transformed_img, 'r'))
 		#print('Inception Stage')
 		#logging.info('Inception Stage')
-		payload = pa.serialize(['i', transformed_img, res_prob]).to_buffer().to_pybytes()
+		transformed_img = pa.deserialize(serialized_transformed_img)
+		payload = pa.serialize([transformed_img, res_prob]).to_buffer().to_pybytes()
 		#ic_index, ic_prob = pa.deserialize(invoke('cascade-inception', payload))
-		ic_index, ic_prob = pa.deserialize(invoke('cascade-inception', payload))
+		ic_index, ic_prob = pa.deserialize(invoke('cascade-inception', payload, 'i'))
 		#print('Cascade Stage')
 		#logging.info('Cascade Stage')
-		payload = pa.serialize(['c', res_index, res_prob, ic_index, ic_prob]).to_buffer().to_pybytes()
+		payload = pa.serialize([res_index, res_prob, ic_index, ic_prob]).to_buffer().to_pybytes()
 		#result = pa.deserialize(invoke('cascade', payload))
 		#socket.send(invoke('cascade-cascade', payload))
-		socket.send(invoke('cascade-cascade', payload))
+		socket.send(invoke('cascade-cascade', payload, 'c'))
 		#print(result)
 
 	#end = time.time()
