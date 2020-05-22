@@ -54,14 +54,21 @@ if __name__ == '__main__':
 		transforms.Resize((256, 256)),
 		transforms.ToTensor()
 	])
-	images = []
-	cap = cv2.VideoCapture('videos/steph3.mp4')
-	more_frames, frame = cap.read()
-	while more_frames:
-		frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-		frame = transform(frame).detach().numpy()
-		images.append(frame)
+
+	prefix = 'video_sample'
+	files = os.listdir(prefix)
+	files = [os.path.join(prefix, fname) for fname in files]
+	image_list = []
+	for fname in files:
+		images = []
+		cap = cv2.VideoCapture(fname)
 		more_frames, frame = cap.read()
+		while more_frames:
+			frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+			frame = transform(frame).detach().numpy()
+			images.append(frame)
+			more_frames, frame = cap.read()
+		image_list.append(images)
 
 	logging.info('listening for trigger')
 
@@ -84,19 +91,22 @@ if __name__ == '__main__':
 				print('request number %d' % request)
 				logging.info('request number %d' % request)
 
-			start = time.time()
+			images = random.choice(image_list)
+
 			segment = 0
+			total = 0
 
 			while segment < 5:
 				payload = pa.serialize(images[6*segment:6*segment+6]).to_buffer().to_pybytes()
+				start = time.time()
 				connect_socket.send(payload)
 				message = connect_socket.recv()
+				end = time.time()
 				#logging.info(pa.deserialize(message))
 				segment += 1
+				total += (end - start)
 
-			end = time.time()
-
-			latencies.append((end - start))
+			latencies.append(total)
 
 		if len(latencies) > 200:
 			del latencies[:200]
