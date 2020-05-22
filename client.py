@@ -96,8 +96,8 @@ if __name__ == '__main__':
 			segment = 0
 			total = 0
 
-			while segment < 30:
-				payload = pa.serialize(images[1*segment:1*segment+1]).to_buffer().to_pybytes()
+			while segment < 5:
+				payload = pa.serialize(images[6*segment:6*segment+6]).to_buffer().to_pybytes()
 				start = time.time()
 				connect_socket.send(payload)
 				message = connect_socket.recv()
