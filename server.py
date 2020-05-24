@@ -42,6 +42,6 @@ if __name__ == '__main__':
 		uid, _ = pa.deserialize(payload)
 
 		payload = pa.serialize([uid, cat]).to_buffer().to_pybytes()
-		result = invoke('rec-cache', payload)
+		result = invoke('rec-preload', payload)
 
 		socket.send(result)
