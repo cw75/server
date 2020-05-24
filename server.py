@@ -1,4 +1,3 @@
-from multiprocessing import Pool
 import boto3
 import time
 import numpy as np
@@ -23,16 +22,6 @@ def invoke(endpoint, payload):
 	    )
 	return response['Body'].read()
 
-def invoke_parallel(inp):
-	endpoint, payload, custom_attributes = inp
-	response = client.invoke_endpoint(
-	    EndpointName=endpoint, 
-	    ContentType=content_type,
-	    CustomAttributes=custom_attributes,
-	    Body=payload
-	    )
-	return response['Body'].read()
-
 
 if __name__ == '__main__':
 	logging.basicConfig(filename='log_server.txt', level=logging.INFO,
@@ -46,22 +35,13 @@ if __name__ == '__main__':
 	print('listening for request')
 	logging.info('listening for request')
 
-	p = Pool(2)
-
 	while True:
 		payload = socket.recv()
 
-		#logging.info('Yolo Stage')
-		result = invoke('video-yolo-gpu', payload)
+		cat = pa.deserialize(invoke('rec-dummy', payload))
+		uid, _ = pa.deserialize(payload)
 
-		#logging.info('Transform Stage')
-		result = invoke('video-transform', result)
+		payload = pa.serialize([uid, cat]).to_buffer().to_pybytes()
+		result = invoke('rec-vpc-redis', payload)
 
-		#logging.info('Parallel Resnet Stage')
-		results = p.map(invoke_parallel, [('video-resnet-person-gpu', result, 'p'), ('video-resnet-vehicle-gpu', result, 'v')])
-
-		accumulated = []
-		for payload in results:
-			accumulated += pa.deserialize(payload)
-
-		socket.send(pa.serialize(accumulated).to_buffer().to_pybytes())
+		socket.send(result)
