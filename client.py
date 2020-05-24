@@ -75,7 +75,7 @@ if __name__ == '__main__':
 			start = time.time()
 			connect_socket.send(payload)
 			message = connect_socket.recv()
-			logging.info(pa.deserialize(message))
+			#logging.info(pa.deserialize(message))
 			end = time.time()
 			latencies.append((end - start))
 
